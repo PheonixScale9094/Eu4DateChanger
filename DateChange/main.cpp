@@ -11,15 +11,20 @@ using namespace std;
 namespace fs = std::filesystem;
 
 //Constants
-const int END_DATE = 1229;
-const fs::path myPath = "E:\Converters\DateChange\DateChange\DateChange\files";
-
+const fs::path myPath = "E:/Converters/DateChange/DateChange/DateChange/files";
+//const fs::path myPath = "C:/Users/9094c/OneDrive/Documents/Paradox Interactive/Europa Universalis IV/mod/1265/history/countries";
 //Funtion Prototype
 void wait();
 
 //Main Funtion
 int main()
 {
+	int endDate = 0;
+	fs::path myPath = "E:/Converters/DateChange/DateChange/DateChange/files";
+
+	int yearsToAdd = 0;
+	int filesProcessed = 0;
+	int datesChanged = 0;
 	ifstream fin;
 	ofstream fout;
 	ifstream tin;
@@ -28,12 +33,18 @@ int main()
 	const string birthdateToken = "birth_date = ";
 	const string deathdateToken = "death_date = ";
 
-	int yearsToAdd;
-	//Calculate years to add
-	yearsToAdd = 1444 - END_DATE;
+	//User Prompts
+	cout << "Enter the full filepath (using /): " << endl;
+	cin >> myPath;
+	cout << "Enter the year of conversion: " << endl;
+	cin >> endDate;	
 
-	cout << "Time being added = " << yearsToAdd << endl;
-	
+	//Calculate years to add
+	yearsToAdd = 1444 - endDate;
+
+	cout << "This will add " << yearsToAdd << "years to all birthdays" << endl;
+	wait();
+
 	const string extension{ ".txt" };
 	int number{ 0 };
 	// iterate through all the files in the directory
@@ -50,11 +61,10 @@ int main()
 			{
 				getline(fin, currentLine);
 
-				size_t found = currentLine.find(birthdateToken); //Looks for Birthday
-				if (found == std::string::npos) {
-					size_t found = currentLine.find(deathdateToken);
-				}
-				if (found != std::string::npos) {
+				size_t bday = currentLine.find(birthdateToken); //Looks for Birthday
+				size_t dday = currentLine.find(deathdateToken); //Looks for Deathday
+				size_t currentdate = currentLine.find(to_string(END_DATE)); //Looks for endDate
+				if (bday != std::string::npos || dday != std::string::npos || currentdate != std::string::npos) {
 					cout << currentLine << endl; // Original String
 
 
@@ -68,7 +78,8 @@ int main()
 					year += yearsToAdd;
 
 					currentLine.replace(yearLoc, 4, to_string(year));
-					
+
+					datesChanged += 1;
 					cout <<	"		converted to" << endl << currentLine << endl << endl; // new String
 				}
 
@@ -87,9 +98,14 @@ int main()
 
 			fout.close();
 			tin.close();
+			filesProcessed += 1;
 			cout << "closed " << dirEntry.path().filename() << endl;
 		}
 	}
+
+	//output how many dates and files were processed
+	cout << endl << "Files processed: " << filesProcessed << endl;
+	cout << endl << "Dates changed: " << datesChanged << endl;
 
 	//Closing Statements
 	tin.close();
